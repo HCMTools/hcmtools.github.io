@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>LED Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #ecf0f3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+
+    .card {
+      background: #ecf0f3;
+      padding: 28px 32px;
+      border-radius: 20px;
+      width: 360px;
+      box-shadow: 9px 9px 16px #c9ccd1,
+                  -9px -9px 16px #ffffff;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: none;
+      background: #ecf0f3;
+      box-shadow: inset 4px 4px 8px #c9ccd1,
+                  inset -4px -4px 8px #ffffff;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      background: #5b8cff;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 6px 6px 12px rgba(91,140,255,0.4),
+                  -6px -6px 12px rgba(255,255,255,0.6);
+    }
+
+    button:hover {
+      background: #4a7af0;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #ecf0f3;
+      box-shadow: inset 4px 4px 8px #c9ccd1,
+                  inset -4px -4px 8px #ffffff;
+      font-size: 14px;
+    }
+
+    .result span {
+      font-weight: 600;
+      color: #2f5bea;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔌 LED Calculator</h2>
+
+    <div class="form-group">
+      <label>Chiều dài đèn (m)</label>
+      <input type="number" id="length" value="2" step="0.1" />
+    </div>
+
+    <div class="form-group">
+      <label>Số đường LED</label>
+      <input type="number" id="lines" value="2" />
+    </div>
+
+    <div class="form-group">
+      <label>Công suất LED (W/m)</label>
+      <input type="number" id="powerPerM" value="10" />
+    </div>
+
+    <div class="form-group">
+      <label>Công suất nguồn (W)</label>
+      <input type="number" id="psu" value="100" />
+    </div>
+
+    <button onclick="calculate()">Tính toán</button>
+
+    <div class="result" id="result">
+      👉 Vui lòng nhập thông số và bấm <b>Tính toán</b>
+    </div>
+  </div>
+
+  <script>
+    function calculate() {
+      const length = parseFloat(document.getElementById('length').value) || 0;
+      const lines = parseInt(document.getElementById('lines').value) || 0;
+      const powerPerM = parseFloat(document.getElementById('powerPerM').value) || 0;
+      const psu = parseFloat(document.getElementById('psu').value) || 1;
+
+      // làm tròn lên theo thực tế thi công
+      const totalLedRaw = length * lines;
+      const totalLed = Math.ceil(totalLedRaw); // mét LED (làm tròn lên)
+
+      const totalPowerRaw = totalLed * powerPerM;
+      const totalPower = Math.ceil(totalPowerRaw); // W (làm tròn lên)
+
+      const psuCount = Math.ceil(totalPower / psu); // số nguồn (làm tròn lên)
+
+      document.getElementById('result').innerHTML = `
+        Tổng chiều dài LED: <span>${totalLed} m</span><br/>
+        Tổng công suất LED: <span>${totalPower} W</span><br/>
+        Tổng số nguồn (<span>${psu}W</span>) cần dùng: <span>${psuCount} cục</span>
+      `;
+    }
+  </script>
+</body>
+</html>
