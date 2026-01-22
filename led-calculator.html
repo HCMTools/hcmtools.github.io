@@ -2,166 +2,231 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>LED Calculator | ILUMEN TOOLS</title>
+  <title>LED Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
       background: #ecf0f3;
-      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      min-height: 100vh;
       color: #333;
     }
 
     .card {
-      background: #ecf0f3;
-      border-radius: 26px;
-      padding: 26px;
-      width: 92%;
+      width: 100%;
       max-width: 420px;
-      box-shadow:
-        14px 14px 28px #c9ccd1,
-       -14px -14px 28px #ffffff;
+      background: #ecf0f3;
+      border-radius: 24px;
+      padding: 26px 22px 28px;
+      box-shadow: 12px 12px 24px #c9ccd1,
+                  -12px -12px 24px #ffffff;
     }
 
-    /* BACK BUTTON */
     .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 6px 14px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 700;
       color: #2f5bea;
       text-decoration: none;
-      padding: 8px 14px;
       border-radius: 14px;
       background: #ecf0f3;
-      box-shadow:
-        6px 6px 12px #c9ccd1,
-       -6px -6px 12px #ffffff;
-      transition: all .2s ease;
-    }
-
-    .back-btn:hover {
-      color: #1e40af;
-      box-shadow:
-        inset 4px 4px 8px #c9ccd1,
-        inset -4px -4px 8px #ffffff;
+      box-shadow: 4px 4px 8px #c9ccd1,
+                  -4px -4px 8px #ffffff;
     }
 
     h2 {
       text-align: center;
-      margin: 16px 0 22px;
+      margin: 6px 0 18px;
       font-size: 20px;
     }
 
     label {
       font-size: 13px;
-      margin-top: 14px;
+      margin-bottom: 6px;
       display: block;
     }
 
     input {
       width: 100%;
-      padding: 11px 14px;
-      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      border-radius: 18px;
       border: none;
-      outline: none;
-      margin-top: 6px;
       background: #ecf0f3;
-      box-shadow:
-        inset 4px 4px 8px #c9ccd1,
-        inset -4px -4px 8px #ffffff;
+      box-shadow: inset 5px 5px 10px #c9ccd1,
+                  inset -5px -5px 10px #ffffff;
       font-size: 14px;
+      outline: none;
     }
 
     button {
       width: 100%;
-      margin-top: 22px;
       padding: 14px;
+      margin-top: 6px;
       border-radius: 18px;
       border: none;
       background: #5b8cff;
       color: #fff;
       font-size: 15px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      box-shadow:
-        6px 6px 14px #c3c7cd,
-       -6px -6px 14px #ffffff;
-    }
-
-    button:hover {
-      background: #4a78f5;
     }
 
     .result {
-      margin-top: 22px;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #ecf0f3;
+      box-shadow: inset 4px 4px 8px #c9ccd1,
+                  inset -4px -4px 8px #ffffff;
       font-size: 14px;
-      line-height: 1.65;
-      text-align: center;
+      line-height: 1.6;
     }
 
-    .psu-highlight {
-      color: #e63946;
+    .value {
+      font-weight: 700;
+      color: #2f5bea;
+    }
+
+    .power {
+      color: #d93025;
+      font-weight: 700;
+    }
+
+    /* ===== MODAL KẾT QUẢ ===== */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ecf0f3;
+      border-radius: 22px;
+      padding: 22px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 14px 14px 28px #c9ccd1,
+                  -14px -14px 28px #ffffff;
+    }
+
+    .modal-title {
+      text-align: center;
       font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .modal-result {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .close-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 16px;
+      border: none;
+      background: #5b8cff;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
+
 <body>
 
   <div class="card">
-
     <a href="index.html" class="back-btn">← Về trang chủ</a>
 
     <h2>🔌 LED Calculator</h2>
 
-    <label>Chiều dài LED/đèn (m)</label>
-    <input type="number" id="length" value="2" step="0.1">
+    <label>Chiều dài đèn | Chiều dài LED (m)</label>
+    <input type="number" id="length" value="0" min="0" />
 
-    <label>Số đường LED</label>
-    <input type="number" id="line" value="1">
+    <label>Số lượng đèn cùng Kích Thước</label>
+    <input type="number" id="qty" value="1" min="1" />
 
-    <label>Công suất LED (W/m)</label>
-    <input type="number" id="powerPerM" value="10">
+    <label>Số đường LED của 1 đèn</label>
+    <input type="number" id="lines" value="1" min="1" />
 
-    <label>Công suất nguồn (W)</label>
-    <input type="number" id="psu" value="200">
+    <label>Công suất loại LED đang dùng(W/m)</label>
+    <input type="number" id="powerPerM" value="10" />
 
-    <button onclick="calc()">Tính toán</button>
+    <label>Loại nguồn cần mua bao nhiêu (W)</label>
+    <input type="number" id="psu" value="100" />
 
-    <div class="result" id="result"></div>
+    <button onclick="calculate()">Tính toán</button>
+
+    <div class="result" id="resultBox">
+      <div>Tổng chiều dài LED: <span class="value" id="rLength">–</span></div>
+      <div>Tổng công suất LED: <span class="value" id="rPower">–</span></div>
+      <div>
+        Tổng số nguồn 
+        <span class="power" id="rPsu">–</span>: 
+        <span class="value" id="rQty">–</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP KẾT QUẢ -->
+  <div class="modal" id="resultModal">
+    <div class="modal-box">
+      <div class="modal-title">📊 Kết quả tính toán</div>
+      <div class="modal-result" id="modalContent"></div>
+      <button class="close-btn" onclick="closeModal()">Đóng</button>
+    </div>
   </div>
 
   <script>
-    function roundUp(value) {
-      return Math.ceil(value);
-    }
+    function calculate() {
+      const length = Number(document.getElementById("length").value);
+      const qty = Number(document.getElementById("qty").value);
+      const lines = Number(document.getElementById("lines").value);
+      const powerPerM = Number(document.getElementById("powerPerM").value);
+      const psu = Number(document.getElementById("psu").value);
 
-    function calc() {
-      const length = Number(document.getElementById('length').value);
-      const line = Number(document.getElementById('line').value);
-      const powerPerM = Number(document.getElementById('powerPerM').value);
-      const psu = Number(document.getElementById('psu').value);
+      const totalLength = Math.ceil(length * qty * lines);
+      const totalPower = Math.ceil(totalLength * powerPerM);
+      const totalPsu = Math.ceil(totalPower / psu);
 
-      const totalLed = roundUp(length * line);
-      const totalPower = roundUp(totalLed * powerPerM);
-      const totalPsu = roundUp(totalPower / psu);
+      document.getElementById("rLength").innerText = totalLength + " m";
+      document.getElementById("rPower").innerText = totalPower + " W";
+      document.getElementById("rPsu").innerText = psu + "W";
+      document.getElementById("rQty").innerText = totalPsu + " cục";
 
-      document.getElementById('result').innerHTML = `
-        <strong>Tổng chiều dài LED:</strong> ${totalLed} m<br>
-        <strong>Tổng công suất LED:</strong> ${totalPower} W<br>
-        <strong>
-          Tổng số nguồn (<span class="psu-highlight">${psu}W</span>):
-        </strong> ${totalPsu} cục
+      document.getElementById("modalContent").innerHTML = `
+        Tổng chiều dài LED: <b class="value">${totalLength} m</b><br>
+        Tổng công suất LED: <b class="value">${totalPower} W</b><br>
+        Tổng số nguồn <b class="power">${psu}W</b>: <b class="value">${totalPsu} cục</b>
       `;
+
+      document.getElementById("resultModal").classList.add("active");
     }
 
-    calc();
+    function closeModal() {
+      document.getElementById("resultModal").classList.remove("active");
+    }
   </script>
 
 </body>
