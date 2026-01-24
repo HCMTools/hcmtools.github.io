@@ -53,6 +53,7 @@
     }
     .row { display: flex; gap: 10px; }
     .row > div { flex: 1; }
+
     button {
       width: 100%;
       padding: 14px;
@@ -77,7 +78,6 @@
     .value { font-weight: 700; color: #2f5bea; }
     .power { font-weight: 700; color: #d93025; }
 
-    /* CHẾ ĐỘ */
     .mode {
       display: flex;
       gap: 10px;
@@ -94,7 +94,6 @@
       color: #fff;
     }
 
-    /* MODAL */
     .modal {
       position: fixed;
       inset: 0;
@@ -136,8 +135,8 @@
     }
   </style>
 </head>
-
 <body>
+
 <div class="card">
   <a href="index.html" class="back-btn">← Về trang chủ</a>
   <h2>🔌 LED Calculator</h2>
@@ -148,12 +147,19 @@
     <button id="btnExact" onclick="setMode('exact')">🎯 Chính xác</button>
   </div>
 
-  <label>Chiều dài (m) | Số lượng đèn</label>
+  <!-- CHIỀU DÀI | SỐ LƯỢNG -->
   <div class="row">
-    <div><input type="number" id="length" value="0" step="0.01"></div>
-    <div><input type="number" id="qty" value="1"></div>
+    <div>
+      <label>Chiều dài (m)</label>
+      <input type="number" id="length" value="0" step="0.01">
+    </div>
+    <div>
+      <label>Số lượng đèn</label>
+      <input type="number" id="qty" value="1">
+    </div>
   </div>
 
+  <!-- SỐ ĐƯỜNG LED -->
   <label>Số đường LED</label>
   <div class="row">
     <div>
@@ -164,12 +170,15 @@
         <option value="3">&gt; 200mm → 3 đường</option>
       </select>
     </div>
-    <div><input type="number" id="lines" value="1"></div>
+    <div>
+      <input type="number" id="lines" value="1">
+    </div>
   </div>
 
-  <label>Loại LED | Công suất</label>
+  <!-- LOẠI LED | CÔNG SUẤT -->
   <div class="row">
     <div>
+      <label>Chọn Loại LED đang dùng</label>
       <select id="ledType" onchange="applyLed()">
         <option value="">— Chọn loại LED —</option>
         <option value="20">2835-10MM-240D — 20W/m</option>
@@ -184,11 +193,14 @@
         <option value="60">2835-50MM-600D — 60W/m</option>
       </select>
     </div>
-    <div><input type="number" id="powerPerM" value="20"></div>
+    <div>
+      <label>Công suất (W/m)</label>
+      <input type="number" id="powerPerM" value="28">
+    </div>
   </div>
 
   <label>Công suất 1 nguồn (W)</label>
-  <input type="number" id="psu" value="200">
+  <input type="number" id="psu" value="400">
 
   <label>Công suất nguồn sử dụng (%)</label>
   <input type="number" id="loadPercent" value="80">
@@ -215,6 +227,13 @@
 <script>
 let calcMode = "safe";
 
+const lengthInput = document.getElementById("length");
+const qtyInput = document.getElementById("qty");
+const linesInput = document.getElementById("lines");
+const powerPerMInput = document.getElementById("powerPerM");
+const psuInput = document.getElementById("psu");
+const loadPercentInput = document.getElementById("loadPercent");
+
 function fmt(n) {
   return Number.isInteger(n) ? n : n.toFixed(2);
 }
@@ -228,6 +247,7 @@ function setMode(m) {
 function applyLed() {
   if (ledType.value) powerPerM.value = ledType.value;
 }
+
 function applyLine() {
   if (lineSuggest.value) lines.value = lineSuggest.value;
 }
@@ -242,7 +262,6 @@ function calculate() {
 
   let lengthPerLamp, powerPerLamp;
 
-  // ===== TÍNH CHO 1 ĐÈN =====
   if (calcMode === "safe") {
     lengthPerLamp = Math.ceil(length * lines);
     powerPerLamp  = Math.ceil(lengthPerLamp * powerPerM);
@@ -254,12 +273,10 @@ function calculate() {
   const requiredPsuPowerPerLamp = powerPerLamp / (load / 100);
   const psuPerLamp = Math.ceil(requiredPsuPowerPerLamp / psu);
 
-  // ===== NHÂN SỐ LƯỢNG =====
   const totalLength = lengthPerLamp * qty;
   const totalPower  = powerPerLamp * qty;
   const totalPsu    = psuPerLamp * qty;
 
-  // ===== HIỂN THỊ =====
   rLength.innerText = fmt(totalLength) + " m";
   rPower.innerText  = fmt(totalPower) + " W";
   rPsu.innerText    = psu + "W (" + load + "%)";
@@ -276,17 +293,10 @@ function calculate() {
   resultModal.classList.add("active");
 }
 
-
 function closeModal() {
   resultModal.classList.remove("active");
 }
-
-const lengthInput = document.getElementById("length");
-const qtyInput = document.getElementById("qty");
-const linesInput = document.getElementById("lines");
-const powerPerMInput = document.getElementById("powerPerM");
-const psuInput = document.getElementById("psu");
-const loadPercentInput = document.getElementById("loadPercent");
 </script>
+
 </body>
 </html>
