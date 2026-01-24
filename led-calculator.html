@@ -240,19 +240,26 @@ function calculate() {
   const psu = +psuInput.value;
   const load = +loadPercentInput.value;
 
-  let totalLength, totalPower;
+  let lengthPerLamp, powerPerLamp;
 
+  // ===== TÍNH CHO 1 ĐÈN =====
   if (calcMode === "safe") {
-    totalLength = Math.ceil(length * qty * lines);
-    totalPower  = Math.ceil(totalLength * powerPerM);
+    lengthPerLamp = Math.ceil(length * lines);
+    powerPerLamp  = Math.ceil(lengthPerLamp * powerPerM);
   } else {
-    totalLength = length * qty * lines;
-    totalPower  = totalLength * powerPerM;
+    lengthPerLamp = length * lines;
+    powerPerLamp  = lengthPerLamp * powerPerM;
   }
 
-  const requiredPsuPower = totalPower / (load / 100);
-  const totalPsu = Math.ceil(requiredPsuPower / psu);
+  const requiredPsuPowerPerLamp = powerPerLamp / (load / 100);
+  const psuPerLamp = Math.ceil(requiredPsuPowerPerLamp / psu);
 
+  // ===== NHÂN SỐ LƯỢNG =====
+  const totalLength = lengthPerLamp * qty;
+  const totalPower  = powerPerLamp * qty;
+  const totalPsu    = psuPerLamp * qty;
+
+  // ===== HIỂN THỊ =====
   rLength.innerText = fmt(totalLength) + " m";
   rPower.innerText  = fmt(totalPower) + " W";
   rPsu.innerText    = psu + "W (" + load + "%)";
@@ -262,11 +269,13 @@ function calculate() {
     Chế độ: <b>${calcMode === "safe" ? "An toàn" : "Chính xác"}</b><br>
     Tổng chiều dài LED: <b>${fmt(totalLength)} m</b><br>
     Tổng công suất LED: <b>${fmt(totalPower)} W</b><br>
-    Công suất nguồn yêu cầu: <b>${fmt(requiredPsuPower)} W</b><br>
-    Số nguồn cần dùng: <b>${totalPsu} cục</b>
+    Số nguồn cho 1 đèn: <b>${psuPerLamp} cục</b><br>
+    Tổng số nguồn: <b>${totalPsu} cục</b>
   `;
+
   resultModal.classList.add("active");
 }
+
 
 function closeModal() {
   resultModal.classList.remove("active");
