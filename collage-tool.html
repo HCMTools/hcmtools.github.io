@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🖼️ Auto Collage Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #0a0a0c;
+  --surface: #141418;
+  --surface2: #1e1e25;
+  --border: #2a2a36;
+  --accent: #7c6dff;
+  --accent-glow: rgba(124,109,255,0.12);
+  --accent2: #ff6b8a;
+  --green: #34d399;
+  --text: #eeeef5;
+  --text2: #7a7a90;
+  --r: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+header {
+  padding: 14px 26px; border-bottom: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo-text { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.03em; }
+.logo-text em { color: var(--accent); font-style: normal; }
+.badge { font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; color: var(--text2); }
+.hstats { margin-left: auto; display: flex; gap: 18px; font-size: 0.73rem; color: var(--text2); }
+.hstat { display: flex; align-items: center; gap: 4px; }
+.hnum { color: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+.layout { display: grid; grid-template-columns: 310px 1fr; flex: 1; overflow: hidden; height: calc(100vh - 53px); }
+
+/* SIDEBAR */
+.sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.chead { padding: 9px 13px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+.chead-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.cbody { padding: 13px; display: flex; flex-direction: column; gap: 10px; }
+
+/* DROPZONE */
+.dropzone { border: 2px dashed var(--border); border-radius: 8px; padding: 22px 10px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: var(--bg); }
+.dropzone:hover, .dropzone.over { border-color: var(--accent); background: var(--accent-glow); }
+.dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.dz-icon { font-size: 2rem; margin-bottom: 8px; }
+.dz-txt { font-size: 0.76rem; color: var(--text2); line-height: 1.55; }
+.dz-txt strong { color: var(--accent); }
+
+/* COUNT */
+.count-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: var(--bg); border-radius: 7px; border: 1px solid var(--border); }
+.cbadge { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--green); font-weight: 600; }
+.cgrp { font-size: 0.68rem; color: var(--text2); }
+.btn-clear { font-size: 0.68rem; color: var(--accent2); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.btn-clear:hover { background: rgba(255,107,138,0.1); }
+
+/* THUMBS */
+.tgrid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 130px; overflow-y: auto; }
+.tw { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.tw img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 1.5px solid var(--border); display: block; }
+.grpb { position: absolute; bottom: 1px; right: 1px; background: var(--accent); color: #fff; font-size: 7px; font-weight: 700; padding: 1px 3px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; }
+.rmb { display: none; position: absolute; top: -4px; right: -4px; width: 13px; height: 13px; background: var(--accent2); border: none; border-radius: 50%; color: #fff; font-size: 8px; cursor: pointer; align-items: center; justify-content: center; }
+.tw:hover .rmb { display: flex; }
+
+/* FIELDS */
+.flabel { font-size: 0.7rem; color: var(--text2); margin-bottom: 4px; display: block; }
+input[type="text"], input[type="number"], select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px; color: var(--text); font-size: 0.8rem; font-family: 'Be Vietnam Pro', sans-serif; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); }
+input[type="number"] { font-family: 'JetBrains Mono', monospace; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* LOGO BOX */
+.logo-box { border: 1px solid var(--border); border-radius: 8px; padding: 9px; display: flex; gap: 9px; align-items: center; cursor: pointer; position: relative; transition: border-color 0.2s; background: var(--bg); }
+.logo-box:hover { border-color: var(--accent); }
+.logo-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.lthumb { width: 40px; height: 40px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; overflow: hidden; }
+.lthumb img { width: 100%; height: 100%; object-fit: contain; }
+.linfo { font-size: 0.7rem; color: var(--text2); overflow: hidden; }
+.linfo strong { color: var(--text); display: block; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* POS GRID */
+.pos-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; }
+.pbtn { aspect-ratio: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--text2); transition: all 0.15s; }
+.pbtn:hover { border-color: var(--accent); color: var(--accent); }
+.pbtn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+/* SLIDER */
+.slrow { display: flex; align-items: center; gap: 8px; }
+input[type="range"] { flex: 1; -webkit-appearance: none; height: 3px; border-radius: 2px; background: var(--border); outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+.sval { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); min-width: 32px; text-align: right; }
+
+/* TOGGLE */
+.trow { display: flex; align-items: center; justify-content: space-between; padding: 1px 0; }
+.trow span { font-size: 0.76rem; }
+.tog { width: 32px; height: 17px; background: var(--border); border-radius: 9px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+.tog.on { background: var(--accent); }
+.tog::after { content: ''; position: absolute; width: 11px; height: 11px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+.tog.on::after { transform: translateX(15px); }
+
+/* INFO BOX */
+.iinfo { background: rgba(124,109,255,0.07); border: 1px solid rgba(124,109,255,0.18); border-radius: 6px; padding: 7px 9px; font-size: 0.7rem; color: var(--accent); line-height: 1.55; }
+.ginfo { background: rgba(52,211,153,0.07); border: 1px solid rgba(52,211,153,0.18); border-radius: 6px; padding: 7px 9px; font-size: 0.7rem; color: var(--green); line-height: 1.55; }
+
+/* COLOR */
+.crow { display: flex; align-items: center; gap: 7px; }
+input[type="color"] { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 5px; background: none; cursor: pointer; padding: 2px; flex-shrink: 0; }
+
+/* BG COLOR ROW */
+.bg-color-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bgc-swatch { width: 22px; height: 22px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; flex-shrink: 0; }
+.bgc-swatch.active { border-color: var(--accent); }
+.bgc-custom { display: flex; align-items: center; gap: 5px; margin-left: auto; font-size: 0.68rem; color: var(--text2); }
+
+/* BUTTONS */
+.btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg,var(--accent),#a855f7); border: none; border-radius: var(--r); color: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-gen:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,109,255,0.3); }
+.btn-gen:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sec { width: 100%; padding: 8px; background: transparent; border: 1px solid var(--border); border-radius: var(--r); color: var(--text2); font-size: 0.76rem; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.btn-sec:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* PROGRESS */
+.pwrap { display: none; flex-direction: column; gap: 5px; }
+.pwrap.show { display: flex; }
+.pbar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.pfill { height: 100%; background: linear-gradient(90deg,var(--accent),#a855f7); border-radius: 2px; transition: width 0.25s; width: 0%; }
+.ptxt { font-size: 0.68rem; color: var(--text2); font-family: 'JetBrains Mono', monospace; text-align: center; }
+
+/* MAIN */
+.main { overflow-y: auto; padding: 22px; background: #080809; display: flex; flex-direction: column; gap: 18px; }
+.rhead { display: flex; align-items: center; gap: 10px; }
+.rtitle { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2); }
+.btn-dl-all { margin-left: auto; padding: 7px 16px; background: var(--green); border: none; border-radius: 7px; color: #000; font-size: 0.75rem; font-weight: 700; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.2s; display: none; align-items: center; gap: 5px; }
+.btn-dl-all:hover { filter: brightness(1.1); }
+.btn-dl-all.show { display: flex; }
+
+/* COLLAGE GRID */
+.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.ccard { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; transition: border-color 0.2s; }
+.ccard:hover { border-color: var(--accent); }
+.cpreview { width: 100%; aspect-ratio: 1; overflow: hidden; background: var(--surface2); position: relative; cursor: zoom-in; }
+.cpreview canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+.overlay { position: absolute; inset: 0; background: rgba(8,8,9,0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.otxt { font-size: 0.72rem; color: var(--text2); }
+.cfoot { padding: 11px 13px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
+.cname { font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+.cmeta { font-size: 0.65rem; color: var(--text2); }
+.btn-dls { padding: 5px 12px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text2); font-size: 0.7rem; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.15s; display: flex; align-items: center; gap: 4px; }
+.btn-dls:hover { border-color: var(--green); color: var(--green); }
+.btn-dls:disabled { opacity: 0.35; cursor: wait; }
+
+/* EMPTY */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 14px; color: var(--text2); }
+.eico { font-size: 3.5rem; }
+.etitle { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+.esub { font-size: 0.78rem; text-align: center; line-height: 1.6; max-width: 300px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 6px; }
+.chip { padding: 4px 11px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; font-size: 0.7rem; color: var(--text2); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 18px; right: 18px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 13px; font-size: 0.76rem; transform: translateY(60px); opacity: 0; transition: all 0.25s; z-index: 999; max-width: 260px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-color: var(--green); }
+.toast.err { border-color: var(--accent2); }
+
+/* MODAL */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+.modal-bg.open { display: flex; }
+.modal-canvas { max-width: 92vw; max-height: 92vh; border-radius: 8px; display: block; }
+.modal-close { position: fixed; top: 16px; right: 16px; width: 38px; height: 38px; background: var(--surface2); border: 1px solid var(--border); border-radius: 50%; color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { border-color: var(--accent2); color: var(--accent2); }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; height: auto; }
+  .sidebar { height: auto; overflow-y: visible; }
+  .main { height: auto; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:1.3rem">🖼️</div>
+  <div class="logo-text">Auto <em>Collage</em> Pro</div>
+  <div class="badge">v1.0</div>
+  <div class="hstats">
+    <div class="hstat">📷 <span class="hnum" id="hTotal">0</span> ảnh</div>
+    <div class="hstat">📦 <span class="hnum" id="hGroups">0</span> nhóm</div>
+    <div class="hstat">✅ <span class="hnum" id="hDone">0</span> xong</div>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <!-- Upload -->
+  <div class="card">
+    <div class="chead"><div class="chead-dot"></div>📁 Upload ảnh</div>
+    <div class="cbody">
+      <div class="dropzone" id="dz">
+        <input type="file" id="fi" accept="image/*" multiple>
+        <div class="dz-icon">🗂️</div>
+        <div class="dz-txt">Kéo thả hoặc <strong>click chọn</strong><br>JPG · PNG · WEBP · Không giới hạn</div>
+      </div>
+      <div id="cntRow" style="display:none" class="count-row">
+        <div>
+          <div class="cbadge" id="cntBadge">0 ảnh</div>
+          <div class="cgrp" id="cntGrp">0 nhóm</div>
+        </div>
+        <button class="btn-clear" onclick="clearAll()">✕ Xóa hết</button>
+      </div>
+      <div class="tgrid" id="tgrid"></div>
+    </div>
+  </div>
+
+  <!-- Grid Settings -->
+  <div class="card">
+    <div class="chead"><div class="chead-dot" style="background:var(--green)"></div>⚙️ Cài đặt lưới</div>
+    <div class="cbody">
+      <div>
+        <label class="flabel">Số ảnh mỗi collage</label>
+        <select id="perGroup">
+          <option value="9">9 ảnh (3×3)</option>
+          <option value="6">6 ảnh (3×2)</option>
+          <option value="4">4 ảnh (2×2)</option>
+          <option value="1">1 ảnh (1×1)</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div>
+          <label class="flabel">Khoảng cách (px)</label>
+          <input type="number" id="gap" value="4" min="0" max="40">
+        </div>
+        <div>
+          <label class="flabel">Kích thước xuất</label>
+          <input type="number" id="outSize" value="2400" min="800" max="5000" step="200">
+        </div>
+      </div>
+      <div>
+        <label class="flabel" style="margin-bottom:6px">Màu nền</label>
+        <div class="bg-color-row">
+          <div class="bgc-swatch active" style="background:#ffffff" data-color="#ffffff" onclick="selectBgColor(this)" title="Trắng"></div>
+          <div class="bgc-swatch" style="background:#000000" data-color="#000000" onclick="selectBgColor(this)" title="Đen"></div>
+          <div class="bgc-swatch" style="background:#1a1a1a" data-color="#1a1a1a" onclick="selectBgColor(this)" title="Tối"></div>
+          <div class="bgc-swatch" style="background:#f5f0eb" data-color="#f5f0eb" onclick="selectBgColor(this)" title="Kem"></div>
+          <div class="bgc-swatch" style="background:#e8f4f8" data-color="#e8f4f8" onclick="selectBgColor(this)" title="Xanh nhạt"></div>
+          <div class="bgc-custom">
+            <input type="color" id="bgColorPicker" value="#ffffff" oninput="onBgColorPick(this.value)" style="width:22px;height:22px;padding:1px;">
+            <span>Tùy chọn</span>
+          </div>
+        </div>
+      </div>
+      <div class="ginfo">
+        ✅ Ảnh được ghép <strong>nguyên chất lượng</strong> · Giữ đúng tỷ lệ gốc · Không crop · Không méo · Fit vào ô (contain)
+      </div>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="card">
+    <div class="chead"><div class="chead-dot" style="background:var(--accent2)"></div>💧 Logo Watermark</div>
+    <div class="cbody">
+      <label class="logo-box">
+        <input type="file" id="logoInput" accept="image/*" onchange="loadLogo(this)">
+        <div class="lthumb" id="lthumb">🏷️</div>
+        <div class="linfo">
+          <strong id="lname">Chưa chọn logo</strong>
+          <span>Click chọn · PNG trong suốt tốt nhất</span>
+        </div>
+      </label>
+      <div class="trow">
+        <span>Hiển thị watermark</span>
+        <div class="tog on" id="tWM" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div>
+        <label class="flabel">Độ mờ</label>
+        <div class="slrow">
+          <input type="range" id="loOp" min="5" max="80" value="22" oninput="document.getElementById('opv').textContent=this.value+'%'">
+          <span class="sval" id="opv">22%</span>
+        </div>
+      </div>
+      <div>
+        <label class="flabel">Kích thước logo (% ảnh)</label>
+        <div class="slrow">
+          <input type="range" id="loSz" min="10" max="70" value="32" oninput="document.getElementById('szv').textContent=this.value+'%'">
+          <span class="sval" id="szv">32%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="card">
+    <div class="chead"><div class="chead-dot" style="background:var(--accent2)"></div>🏷️ Mã ảnh</div>
+    <div class="cbody">
+      <div>
+        <label class="flabel">Nhập mã ảnh</label>
+        <input type="text" id="imgCode" placeholder="VD: Q845, © Brand..." value="Q845">
+      </div>
+      <div>
+        <label class="flabel" style="margin-bottom:7px">Vị trí hiển thị</label>
+        <div class="pos-grid">
+          <button class="pbtn" data-p="top-left"    onclick="setPos(this)">↖</button>
+          <button class="pbtn" data-p="top-center"  onclick="setPos(this)">↑</button>
+          <button class="pbtn" data-p="top-right"   onclick="setPos(this)">↗</button>
+          <button class="pbtn" data-p="mid-left"    onclick="setPos(this)">←</button>
+          <button class="pbtn" data-p="center"      onclick="setPos(this)">⊙</button>
+          <button class="pbtn" data-p="mid-right"   onclick="setPos(this)">→</button>
+          <button class="pbtn" data-p="bot-left"    onclick="setPos(this)">↙</button>
+          <button class="pbtn" data-p="bot-center"  onclick="setPos(this)">↓</button>
+          <button class="pbtn active" data-p="bot-right" onclick="setPos(this)">↘</button>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label class="flabel">Màu chữ</label>
+          <div class="crow">
+            <input type="color" id="ccolor" value="#ff3333">
+            <span style="font-size:0.7rem;color:var(--text2)">Màu mã</span>
+          </div>
+        </div>
+        <div>
+          <label class="flabel">Cỡ chữ (px)</label>
+          <input type="number" id="cfz" value="80" min="20" max="300">
+        </div>
+      </div>
+      <div class="trow">
+        <span>Nền mờ cho mã</span>
+        <div class="tog on" id="tCBg" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Format -->
+  <div class="card">
+    <div class="chead"><div class="chead-dot" style="background:var(--green)"></div>📤 Định dạng xuất</div>
+    <div class="cbody">
+      <div class="row2">
+        <div>
+          <label class="flabel">Định dạng</label>
+          <select id="outFmt">
+            <option value="jpeg">JPG</option>
+            <option value="png" selected>PNG</option>
+          </select>
+        </div>
+        <div>
+          <label class="flabel">Chất lượng JPG</label>
+          <div class="slrow">
+            <input type="range" id="jpgQ" min="70" max="100" value="95" oninput="document.getElementById('qv').textContent=this.value+'%'">
+            <span class="sval" id="qv">95%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="pwrap" id="pwrap">
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="ptxt" id="ptxt"></div>
+    </div>
+    <button class="btn-gen" id="btnGen" onclick="startGenerate()">✨ Tạo tất cả collage</button>
+    <button class="btn-sec" onclick="resetAll()">🔄 Làm mới tất cả</button>
+  </div>
+
+</div><!-- /sidebar -->
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainArea">
+
+  <div class="rhead">
+    <span class="rtitle">Kết quả</span>
+    <span id="resCount" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--accent)"></span>
+    <button class="btn-dl-all" id="btnDlAll" onclick="downloadAll()">
+      📦 Tải ZIP (<span id="dlCnt">0</span>)
+    </button>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty" id="emptyState">
+    <div class="eico">🎞️</div>
+    <div class="etitle">Chưa có collage nào</div>
+    <div class="esub">Upload ảnh → Chọn cài đặt → Nhấn "Tạo tất cả collage"</div>
+    <div class="chips">
+      <div class="chip">✅ Giữ nguyên tỷ lệ gốc</div>
+      <div class="chip">📐 Ảnh ra 1:1</div>
+      <div class="chip">💧 Watermark</div>
+      <div class="chip">📦 Xuất ZIP</div>
+      <div class="chip">🏷️ Mã ảnh</div>
+    </div>
+  </div>
+
+  <div id="resArea" style="display:none;flex-direction:column;gap:14px">
+    <div class="cgrid" id="cgrid"></div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Modal Preview -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <canvas class="modal-canvas" id="modalCanvas"></canvas>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==============================
+// STATE
+// ==============================
+let images = [], logoImg = null, codePos = 'bot-right';
+let canvases = [], doneCount = 0, totalGroups = 0;
+let bgColor = '#ffffff';
+
+// ==============================
+// BG COLOR
+// ==============================
+function selectBgColor(el) {
+  document.querySelectorAll('.bgc-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  bgColor = el.dataset.color;
+  document.getElementById('bgColorPicker').value = bgColor;
+}
+function onBgColorPick(val) {
+  bgColor = val;
+  document.querySelectorAll('.bgc-swatch').forEach(s => s.classList.remove('active'));
+}
+
+// ==============================
+// UPLOAD
+// ==============================
+const dz = document.getElementById('dz');
+document.getElementById('fi').addEventListener('change', e => handleFiles([...e.target.files]));
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  handleFiles([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
+});
+
+function handleFiles(files) {
+  if (!files.length) return;
+  let loaded = 0;
+  files.forEach(file => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      images.push({ file, url, img });
+      if (++loaded === files.length) {
+        updateUI();
+        toast(`✓ Thêm ${files.length} ảnh · Tổng ${images.length}`, 'ok');
+      }
+    };
+    img.onerror = () => { if (++loaded === files.length) updateUI(); };
+    img.src = url;
+  });
+}
+
+function updateUI() {
+  const n = images.length;
+  const pg = parseInt(document.getElementById('perGroup').value) || 9;
+  const grps = Math.ceil(n / pg);
+  document.getElementById('hTotal').textContent = n;
+  document.getElementById('hGroups').textContent = grps;
+  document.getElementById('cntRow').style.display = n > 0 ? 'flex' : 'none';
+  document.getElementById('cntBadge').textContent = n + ' ảnh';
+  document.getElementById('cntGrp').textContent = grps + ' collage × ' + pg + ' ảnh/nhóm';
+
+  const tg = document.getElementById('tgrid');
+  tg.innerHTML = '';
+  images.forEach((item, i) => {
+    const g = Math.floor(i / pg) + 1;
+    const d = document.createElement('div');
+    d.className = 'tw';
+    d.innerHTML = `<img src="${item.url}" title="${item.file.name}"><div class="grpb">${g}</div><button class="rmb" onclick="removeImg(${i})">✕</button>`;
+    tg.appendChild(d);
+  });
+}
+
+function removeImg(i) { URL.revokeObjectURL(images[i].url); images.splice(i, 1); updateUI(); }
+function clearAll() { images.forEach(x => URL.revokeObjectURL(x.url)); images = []; updateUI(); resetResults(); }
+document.getElementById('perGroup').addEventListener('change', updateUI);
+
+// ==============================
+// LOGO
+// ==============================
+function loadLogo(input) {
+  const file = input.files[0]; if (!file) return;
+  const url = URL.createObjectURL(file);
+  logoImg = new Image();
+  logoImg.onload = () => {
+    document.getElementById('lname').textContent = file.name;
+    document.getElementById('lthumb').innerHTML = `<img src="${url}">`;
+    toast('✓ Logo đã tải', 'ok');
+  };
+  logoImg.src = url;
+}
+
+// ==============================
+// POSITION
+// ==============================
+function setPos(btn) {
+  document.querySelectorAll('.pbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  codePos = btn.dataset.p;
+}
+
+// ==============================
+// LAYOUT: tính vị trí các ô (không crop, fit contain)
+// ==============================
+function getLayout(n, size, gap) {
+  const cells = [];
+  function fill(cols, rows) {
+    const cw = (size - gap * (cols + 1)) / cols;
+    const ch = (size - gap * (rows + 1)) / rows;
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        if (cells.length < n)
+          cells.push({ x: gap + c * (cw + gap), y: gap + r * (ch + gap), w: cw, h: ch });
+  }
+  if (n >= 7) fill(3, 3);
+  else if (n === 6) fill(3, 2);
+  else if (n <= 4) fill(2, 2);
+  else fill(3, Math.ceil(n / 3));
+  return cells.slice(0, n);
+}
+
+// ==============================
+// DRAW CONTAIN: giữ nguyên tỷ lệ, không crop, không méo
+// ==============================
+function drawContain(ctx, img, x, y, w, h, bg) {
+  // Fill ô bằng màu nền
+  ctx.fillStyle = bg;
+  ctx.fillRect(x, y, w, h);
+
+  const imgW = img.naturalWidth || img.width;
+  const imgH = img.naturalHeight || img.height;
+  if (!imgW || !imgH) return;
+
+  const imgAspect = imgW / imgH;
+  const cellAspect = w / h;
+
+  let dw, dh;
+  if (imgAspect >= cellAspect) {
+    // Ảnh rộng hơn ô → fit width
+    dw = w;
+    dh = w / imgAspect;
+  } else {
+    // Ảnh cao hơn ô → fit height
+    dh = h;
+    dw = h * imgAspect;
+  }
+
+  const dx = x + (w - dw) / 2;
+  const dy = y + (h - dh) / 2;
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.restore();
+}
+
+// ==============================
+// DRAW CODE
+// ==============================
+function drawCode(ctx, code, size) {
+  if (!code) return;
+  const fz = parseInt(document.getElementById('cfz').value) || 80;
+  const color = document.getElementById('ccolor').value;
+  const showBg = document.getElementById('tCBg').classList.contains('on');
+
+  ctx.font = `bold ${fz}px 'JetBrains Mono', monospace`;
+  ctx.textBaseline = 'middle';
+
+  const tw = ctx.measureText(code).width;
+  const th = fz * 1.2;
+  const pad = fz * 0.35;
+  const mg = fz * 0.55;
+
+  const map = {
+    'top-left':   [mg, mg + th / 2],
+    'top-center': [size / 2 - tw / 2, mg + th / 2],
+    'top-right':  [size - mg - tw, mg + th / 2],
+    'mid-left':   [mg, size / 2],
+    'center':     [size / 2 - tw / 2, size / 2 + 40],
+    'mid-right':  [size - mg - tw, size / 2],
+    'bot-left':   [mg, size - mg - th / 2],
+    'bot-center': [size / 2 - tw / 2, size - mg - th / 2],
+    'bot-right':  [size - mg - tw, size - mg - th / 2],
+  };
+  const [tx, ty] = map[codePos] || map['bot-right'];
+
+  if (showBg) {
+    ctx.fillStyle = 'rgba(0,0,0,0.52)';
+    rrect(ctx, tx - pad, ty - th / 2 - pad / 2, tw + pad * 2, th + pad, fz * 0.12);
+    ctx.fill();
+  }
+  ctx.fillStyle = color;
+  ctx.fillText(code, tx, ty);
+}
+
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+
+// ==============================
+// GENERATE
+// ==============================
+async function startGenerate() {
+  if (!images.length) { toast('⚠️ Chưa có ảnh nào!', 'err'); return; }
+
+  const btn = document.getElementById('btnGen');
+  btn.disabled = true; btn.innerHTML = '⏳ Đang xử lý...';
+
+  const pg = parseInt(document.getElementById('perGroup').value) || 9;
+  const size = parseInt(document.getElementById('outSize').value) || 2400;
+  const gap = parseInt(document.getElementById('gap').value) || 0;
+  const code = document.getElementById('imgCode').value.trim();
+  const doWM = document.getElementById('tWM').classList.contains('on') && logoImg;
+
+  const groups = [];
+  for (let i = 0; i < images.length; i += pg) groups.push(images.slice(i, i + pg));
+
+  totalGroups = groups.length; doneCount = 0;
+  canvases = new Array(groups.length).fill(null);
+  resetResults(groups.length, code);
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resArea').style.display = 'flex';
+  document.getElementById('hGroups').textContent = groups.length;
+  document.getElementById('hDone').textContent = 0;
+  document.getElementById('resCount').textContent = `${groups.length} collage`;
+  setProgress(true, 0, `Xử lý ${groups.length} nhóm...`);
+
+  // Process 3 at a time
+  let idx = 0;
+  async function next() {
+    if (idx >= groups.length) return;
+    const gi = idx++;
+    await processGroup(gi, groups[gi], size, gap, code, doWM);
+    await next();
+  }
+  await Promise.all(Array.from({ length: Math.min(3, groups.length) }, () => next()));
+
+  setProgress(false);
+  btn.disabled = false; btn.innerHTML = '✨ Tạo tất cả collage';
+  document.getElementById('btnDlAll').classList.add('show');
+  document.getElementById('dlCnt').textContent = groups.length;
+  toast(`🎉 Hoàn thành ${groups.length} collage!`, 'ok');
+}
+
+async function processGroup(gi, group, size, gap, code, doWM) {
+  const cvEl = document.getElementById(`cv-${gi}`);
+  const ov = document.getElementById(`ov-${gi}`);
+  const db = document.getElementById(`db-${gi}`);
+  try {
+    const cv = document.createElement('canvas');
+    cv.width = size; cv.height = size;
+    const ctx = cv.getContext('2d');
+
+    // Fill background
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, size, size);
+
+    const cells = getLayout(group.length, size, gap);
+
+    for (let i = 0; i < group.length; i++) {
+      const src = group[i].img;
+      drawContain(ctx, src, cells[i].x, cells[i].y, cells[i].w, cells[i].h, bgColor);
+    }
+
+    // Watermark
+    if (doWM && logoImg && logoImg.complete) {
+      const op = parseInt(document.getElementById('loOp').value) / 100;
+      const lsz = parseInt(document.getElementById('loSz').value) / 100;
+      const lw = size * lsz;
+      const lh = lw * (logoImg.height / logoImg.width);
+      ctx.save();
+      ctx.globalAlpha = op;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(logoImg, (size - lw) / 2, (size - lh) / 2, lw, lh);
+      ctx.restore();
+    }
+
+    // Code
+    if (code) drawCode(ctx, code, size);
+
+    canvases[gi] = cv;
+
+    // Show preview
+    const pctx = cvEl.getContext('2d');
+    cvEl.width = cv.width; cvEl.height = cv.height;
+    pctx.drawImage(cv, 0, 0);
+
+    ov.style.display = 'none';
+    db.disabled = false;
+    doneCount++;
+    document.getElementById('hDone').textContent = doneCount;
+    setProgress(true, Math.round(doneCount / totalGroups * 100), `Xong ${doneCount}/${totalGroups}...`);
+  } catch (e) {
+    ov.querySelector('.otxt').textContent = '❌ Lỗi';
+    console.error(e);
+  }
+}
+
+// ==============================
+// RESULTS
+// ==============================
+function resetResults(count = 0, code = 'collage') {
+  canvases = []; doneCount = 0;
+  document.getElementById('hDone').textContent = 0;
+  document.getElementById('btnDlAll').classList.remove('show');
+  document.getElementById('resCount').textContent = '';
+  const grid = document.getElementById('cgrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'ccard';
+    const name = (code || 'collage') + '_' + String(i + 1).padStart(2, '0');
+    d.innerHTML = `
+      <div class="cpreview" onclick="openModal(${i})">
+        <canvas id="cv-${i}" width="400" height="400"></canvas>
+        <div class="overlay" id="ov-${i}">
+          <div class="spinner"></div>
+          <div class="otxt">Xử lý nhóm ${i + 1}...</div>
+        </div>
+      </div>
+      <div class="cfoot">
+        <div>
+          <div class="cname">${name}</div>
+          <div class="cmeta">Nhóm ${i + 1} / ${count}</div>
+        </div>
+        <button class="btn-dls" id="db-${i}" onclick="dlSingle(${i})" disabled>⬇️ Tải</button>
+      </div>`;
+    grid.appendChild(d);
+  }
+}
+
+// ==============================
+// DOWNLOAD
+// ==============================
+function dlSingle(gi) {
+  const cv = canvases[gi]; if (!cv) return;
+  const code = document.getElementById('imgCode').value.trim() || 'collage';
+  const fmt = document.getElementById('outFmt').value;
+  const ext = fmt === 'jpeg' ? 'jpg' : 'png';
+  const q = parseInt(document.getElementById('jpgQ').value) / 100;
+  dlCanvas(cv, `${code}_${String(gi + 1).padStart(2, '0')}.${ext}`, fmt, q);
+  toast('⬇️ Đang tải...', 'ok');
+}
+
+async function downloadAll() {
+  const ready = canvases.filter(Boolean);
+  if (!ready.length) { toast('⚠️ Chưa có ảnh!', 'err'); return; }
+  const code = document.getElementById('imgCode').value.trim() || 'collage';
+  const fmt = document.getElementById('outFmt').value;
+  const ext = fmt === 'jpeg' ? 'jpg' : 'png';
+  const q = parseInt(document.getElementById('jpgQ').value) / 100;
+  const mimeType = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+
+  const btn = document.getElementById('btnDlAll');
+  btn.textContent = '⏳ Đang nén ZIP...';
+  btn.disabled = true;
+
+  const zip = new JSZip();
+  for (let i = 0; i < canvases.length; i++) {
+    if (!canvases[i]) continue;
+    const dataUrl = canvases[i].toDataURL(mimeType, q);
+    const base64 = dataUrl.split(',')[1];
+    zip.file(`${code}_${String(i + 1).padStart(2, '0')}.${ext}`, base64, { base64: true });
+  }
+  const content = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+  const url = URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${code}_collage_${Date.now()}.zip`; a.click();
+  URL.revokeObjectURL(url);
+
+  btn.textContent = `📦 Tải ZIP (${ready.length})`;
+  btn.disabled = false;
+  toast(`📦 Đã xuất ZIP ${ready.length} ảnh`, 'ok');
+}
+
+function dlCanvas(cv, name, fmt, q) {
+  const mimeType = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+  const a = document.createElement('a');
+  a.download = name;
+  a.href = cv.toDataURL(mimeType, q);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ==============================
+// MODAL PREVIEW
+// ==============================
+function openModal(gi) {
+  const cv = canvases[gi]; if (!cv) return;
+  const mc = document.getElementById('modalCanvas');
+  mc.width = cv.width; mc.height = cv.height;
+  mc.getContext('2d').drawImage(cv, 0, 0);
+  // Scale down for display
+  const maxW = window.innerWidth * 0.9;
+  const maxH = window.innerHeight * 0.9;
+  const scale = Math.min(maxW / cv.width, maxH / cv.height, 1);
+  mc.style.width = (cv.width * scale) + 'px';
+  mc.style.height = (cv.height * scale) + 'px';
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalBg') || e.target === document.querySelector('.modal-close')) {
+    document.getElementById('modalBg').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modalBg').classList.remove('open'); });
+
+// ==============================
+// RESET
+// ==============================
+function resetAll() {
+  clearAll(); logoImg = null;
+  document.getElementById('lthumb').innerHTML = '🏷️';
+  document.getElementById('lname').textContent = 'Chưa chọn logo';
+  document.getElementById('imgCode').value = 'Q845';
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('resArea').style.display = 'none';
+  document.getElementById('cgrid').innerHTML = '';
+  setProgress(false); toast('🔄 Đã làm mới', 'ok');
+}
+
+// ==============================
+// PROGRESS
+// ==============================
+function setProgress(show, pct, txt) {
+  const w = document.getElementById('pwrap'), f = document.getElementById('pfill'), t = document.getElementById('ptxt');
+  if (show) { w.classList.add('show'); f.style.width = (pct || 0) + '%'; t.textContent = txt || ''; }
+  else { w.classList.remove('show'); f.style.width = '0%'; }
+}
+
+// ==============================
+// TOAST
+// ==============================
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast show ${type}`;
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast', 3000);
+}
+</script>
+</body>
+</html>

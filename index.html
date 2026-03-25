@@ -4,194 +4,518 @@
   <meta charset="UTF-8" />
   <title>ILUMEN TOOLS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface-2: #1a1e28;
+      --border: rgba(255,255,255,0.07);
+      --accent: #4f8eff;
+      --accent-2: #a78bfa;
+      --accent-glow: rgba(79,142,255,0.18);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #9ca3af;
+      --radius: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #ecf0f3;
-      color: #333;
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
+    /* ─── BACKGROUND MESH ─────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,142,255,0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(167,139,250,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── HEADER ──────────────────────────────── */
     header {
-      padding: 24px 16px 10px;
+      position: relative;
+      z-index: 10;
+      padding: 52px 24px 28px;
       text-align: center;
-      font-size: 26px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 6px 18px 6px 10px;
+      margin-bottom: 28px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .logo-badge span {
+      font-family: "Syne", sans-serif;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 2.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
     }
 
-    header span {
-      font-size: 28px;
-      margin-right: 6px;
+    .header-title {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(36px, 8vw, 64px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      animation: fadeDown 0.6s 0.1s ease both;
     }
 
+    .header-title .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-sub {
+      margin-top: 14px;
+      font-size: 15px;
+      color: var(--text-muted);
+      font-weight: 300;
+      letter-spacing: 0.3px;
+      animation: fadeDown 0.6s 0.2s ease both;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── DIVIDER ─────────────────────────────── */
+    .divider {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 clamp(16px, 6vw, 80px);
+      margin-bottom: 36px;
+      animation: fadeDown 0.6s 0.25s ease both;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* ─── GRID ────────────────────────────────── */
     .tools-grid {
+      position: relative;
+      z-index: 10;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 180px));
-      justify-content: center;
-      gap: 24px;
-      padding: 24px 10px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      padding: 0 clamp(16px, 6vw, 80px);
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
       flex: 1;
     }
 
+    /* ─── CARD ────────────────────────────────── */
     .tool-card {
-      background: #ecf0f3;
-      border-radius: 20px;
-      padding: 24px 20px;
-      height: 220px; /* CỐ ĐỊNH CHIỀU CAO CARD */
-      text-align: center;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
       text-decoration: none;
-      color: #333;
+      color: var(--text);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      gap: 14px;
       cursor: pointer;
-      box-shadow: 9px 9px 16px #c9ccd1,
-                  -9px -9px 16px #ffffff;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      animation: fadeUp 0.55s ease both;
+    }
+
+    .tool-card:nth-child(1) { animation-delay: 0.3s; }
+    .tool-card:nth-child(2) { animation-delay: 0.38s; }
+    .tool-card:nth-child(3) { animation-delay: 0.46s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tool-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 60% 0%, var(--accent-glow), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      border-radius: inherit;
     }
 
     .tool-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 12px 12px 20px #c3c7cd,
-                  -12px -12px 20px #ffffff;
+      transform: translateY(-5px);
+      border-color: rgba(79,142,255,0.35);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
     }
 
-    .tool-icon {
-      font-size: 34px;
+    .tool-card:hover::before { opacity: 1; }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .tool-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      transition: background 0.25s ease;
+    }
+
+    .tool-card:hover .tool-icon-wrap {
+      background: rgba(79,142,255,0.12);
+      border-color: rgba(79,142,255,0.3);
+    }
+
+    .card-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 15px;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .tool-card:hover .card-arrow {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      transform: rotate(45deg);
     }
 
     .tool-title {
-      font-size: 16px;
-      font-weight: 600;
+      font-family: "Syne", sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
     }
 
     .tool-desc {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.45;
-      max-width: 180px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
     }
 
+    .card-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(79,142,255,0.1);
+      border: 1px solid rgba(79,142,255,0.2);
+      border-radius: 50px;
+      padding: 3px 10px;
+      align-self: flex-start;
+    }
+
+    /* ─── FOOTER ──────────────────────────────── */
     footer {
+      position: relative;
+      z-index: 10;
       text-align: center;
-      padding: 14px;
+      padding: 40px 16px 28px;
       font-size: 12px;
-      color: #777;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
     }
 
-    /* MODAL */
+    footer strong {
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    /* ─── MODAL ───────────────────────────────── */
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      padding: 20px;
     }
 
-    .modal.active {
-      display: flex;
-    }
+    .modal.active { display: flex; }
 
     .modal-box {
-      background: #ecf0f3;
-      border-radius: 20px;
-      padding: 24px;
-      width: 90%;
-      max-width: 360px;
-      box-shadow: 12px 12px 24px #c9ccd1,
-                  -12px -12px 24px #ffffff;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.9) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(79,142,255,0.12);
+      border: 1px solid rgba(79,142,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
     }
 
     .modal-title {
+      font-family: "Syne", sans-serif;
       font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 14px;
-      text-align: center;
+      font-weight: 700;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
     .file-list a {
-      display: block;
-      padding: 10px 14px;
-      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
       border-radius: 14px;
       text-decoration: none;
-      color: #333;
-      font-size: 14px;
-      background: #ecf0f3;
-      box-shadow: inset 4px 4px 8px #c9ccd1,
-                  inset -4px -4px 8px #ffffff;
+      color: var(--text);
+      font-size: 13.5px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s;
     }
 
     .file-list a:hover {
-      color: #2f5bea;
+      border-color: rgba(79,142,255,0.35);
+      background: rgba(79,142,255,0.06);
+      color: var(--accent);
     }
 
+    .file-list a .file-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .file-list a .file-name { flex: 1; }
+
+    .file-list a .dl-icon {
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .file-list a:hover .dl-icon { color: var(--accent); }
+
     .close-btn {
-      margin-top: 14px;
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border-radius: 14px;
       border: none;
-      background: #5b8cff;
+      background: var(--accent);
       color: #fff;
+      font-family: "Syne", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.15s;
     }
+
+    .close-btn:hover { opacity: 0.88; transform: scale(0.98); }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 600px) {
+      .tools-grid {
+        grid-template-columns: 1fr;
+        padding: 0 16px;
+      }
+      .tool-card { padding: 22px 18px; }
+    }
+
+    @media (min-width: 600px) and (max-width: 900px) {
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 0 24px;
+      }
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 10px; }
   </style>
 </head>
 <body>
 
+  <!-- HEADER -->
   <header>
-    <span>🛠️</span> ILUMEN TOOLS
+    <div class="logo-badge">
+      <div class="logo-dot"></div>
+      <span>Internal Platform</span>
+    </div>
+    <h1 class="header-title">ILUMEN <span class="highlight">TOOLS</span></h1>
+    <p class="header-sub">Bộ công cụ nội bộ dành cho đội ngũ ILUMEN</p>
   </header>
 
+  <!-- DIVIDER -->
+  <div class="divider">
+    <div class="divider-line"></div>
+    <span class="divider-label">Công cụ</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- GRID -->
   <div class="tools-grid">
 
     <a class="tool-card" href="led-calculator.html">
-      <div class="tool-icon">🔌</div>
-      <div class="tool-title">Tính LED và Nguồn</div>
-      <div class="tool-desc">
-        Tính nhanh mét LED, công suất và số nguồn cần dùng
+      <div class="card-top">
+        <div class="tool-icon-wrap">🔌</div>
+        <div class="card-arrow">↗</div>
       </div>
+      <div>
+        <div class="tool-title">Tính LED & Nguồn</div>
+        <div class="tool-desc">Tính nhanh mét LED, công suất và số nguồn cần dùng cho dự án.</div>
+      </div>
+      <div class="card-tag">Calculator</div>
     </a>
-	
-	<a class="tool-card" href="carton-calculator.htm">
-	  <div class="tool-icon">📦</div>
-	  <div class="tool-title">Chưa Xài Được</div>
-	  <div class="tool-desc">
-		Tính kích thước và số lượng thùng giấy cần đóng gói đèn
-	  </div>
-	</a>
+
+    <a class="tool-card" href="collage-tool.html">
+      <div class="card-top">
+        <div class="tool-icon-wrap">🖼️</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div>
+        <div class="tool-title">Ghép Ảnh</div>
+        <div class="tool-desc">Ghép 9 ảnh thành 1 tấm tỷ lệ 1:1, thêm mã sản phẩm và logo chìm.</div>
+      </div>
+      <div class="card-tag">Image Tool</div>
+    </a>
 
     <div class="tool-card" onclick="openModal()">
-      <div class="tool-icon">📦</div>
-      <div class="tool-title">Tải Công Cụ</div>
-      <div class="tool-desc">
-         Nơi tải các công cụ, Extension & file nội bộ ILUMEN (.zip)
+      <div class="card-top">
+        <div class="tool-icon-wrap">📦</div>
+        <div class="card-arrow">↓</div>
       </div>
+      <div>
+        <div class="tool-title">Tải Công Cụ</div>
+        <div class="tool-desc">Extension, file Excel và công cụ nội bộ ILUMEN dạng .zip.</div>
+      </div>
+      <div class="card-tag">Downloads</div>
     </div>
 
   </div>
 
-  <footer>© NQA – Internal Tools</footer>
+  <!-- FOOTER -->
+  <footer>
+    <strong>© NQA</strong> — Internal Tools · ILUMEN Platform
+  </footer>
 
   <!-- MODAL DOWNLOAD -->
   <div class="modal" id="downloadModal">
     <div class="modal-box">
-      <div class="modal-title">📥 Danh sách file tải về</div>
+      <div class="modal-header">
+        <div class="modal-icon">📥</div>
+        <div class="modal-title">Tải về</div>
+      </div>
       <div class="file-list">
-        <!-- File để cùng cấp dự án -->
-        <a href="AmisExtensionV1.0.zip" download>Extension Nhập | Xuất Kho Amis</a>
-		<a href="led-calculator.xlsx" download>File Excel tính LED và Nguồn</a>
-        <!-- Sau này thêm file chỉ cần thêm dòng ở đây -->
-        <!-- <a href="ToolABC.zip" download>ToolABC.zip</a> -->
+        <a href="AmisExtensionV1.0.zip" download>
+          <span class="file-icon">🧩</span>
+          <span class="file-name">Extension Nhập | Xuất Kho Amis</span>
+          <span class="dl-icon">⬇</span>
+        </a>
+        <a href="led-calculator.xlsx" download>
+          <span class="file-icon">📊</span>
+          <span class="file-name">File Excel tính LED và Nguồn</span>
+          <span class="dl-icon">⬇</span>
+        </a>
+        <a href="carton-calculator.xls" download>
+          <span class="file-icon">📦</span>
+          <span class="file-name">File tính kích thước thùng giấy</span>
+          <span class="dl-icon">⬇</span>
+        </a>
       </div>
       <button class="close-btn" onclick="closeModal()">Đóng</button>
     </div>
@@ -201,10 +525,17 @@
     function openModal() {
       document.getElementById('downloadModal').classList.add('active');
     }
-
     function closeModal() {
       document.getElementById('downloadModal').classList.remove('active');
     }
+    // Close on backdrop click
+    document.getElementById('downloadModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
   </script>
 
 </body>

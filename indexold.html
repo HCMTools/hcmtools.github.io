@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>ILUMEN TOOLS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #ecf0f3;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 24px 16px 10px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    header span {
+      font-size: 28px;
+      margin-right: 6px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 180px));
+      justify-content: center;
+      gap: 24px;
+      padding: 24px 10px;
+      flex: 1;
+    }
+
+    .tool-card {
+      background: #ecf0f3;
+      border-radius: 20px;
+      padding: 24px 20px;
+      height: 220px; /* CỐ ĐỊNH CHIỀU CAO CARD */
+      text-align: center;
+      text-decoration: none;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 9px 9px 16px #c9ccd1,
+                  -9px -9px 16px #ffffff;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 12px 12px 20px #c3c7cd,
+                  -12px -12px 20px #ffffff;
+    }
+
+    .tool-icon {
+      font-size: 34px;
+    }
+
+    .tool-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .tool-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.45;
+      max-width: 180px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 14px;
+      font-size: 12px;
+      color: #777;
+    }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ecf0f3;
+      border-radius: 20px;
+      padding: 24px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 12px 12px 24px #c9ccd1,
+                  -12px -12px 24px #ffffff;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .file-list a {
+      display: block;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      background: #ecf0f3;
+      box-shadow: inset 4px 4px 8px #c9ccd1,
+                  inset -4px -4px 8px #ffffff;
+    }
+
+    .file-list a:hover {
+      color: #2f5bea;
+    }
+
+    .close-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 14px;
+      border: none;
+      background: #5b8cff;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span>🛠️</span> ILUMEN TOOLS
+  </header>
+
+  <div class="tools-grid">
+
+    <a class="tool-card" href="led-calculator.html">
+      <div class="tool-icon">🔌</div>
+      <div class="tool-title">Tính LED và Nguồn</div>
+      <div class="tool-desc">
+        Tính nhanh mét LED, công suất và số nguồn cần dùng
+      </div>
+    </a>
+	
+	<a class="tool-card" href="collage-tool.html">
+	  <div class="tool-icon">🖼️</div>
+	  <div class="tool-title">Ghép Ảnh</div>
+	  <div class="tool-desc">
+		Ghép 9 ảnh thành 1 tấm ảnh tỷ lệ 1:1 thêm mã và Logo chìm...
+	  </div>
+	</a>
+
+    <div class="tool-card" onclick="openModal()">
+      <div class="tool-icon">📦</div>
+      <div class="tool-title">Tải Công Cụ</div>
+      <div class="tool-desc">
+         Nơi tải các công cụ, Extension & file nội bộ ILUMEN (.zip)
+      </div>
+    </div>
+
+  </div>
+
+  <footer>© NQA – Internal Tools</footer>
+
+  <!-- MODAL DOWNLOAD -->
+  <div class="modal" id="downloadModal">
+    <div class="modal-box">
+      <div class="modal-title">📥 Danh sách file tải về</div>
+      <div class="file-list">
+        <!-- File để cùng cấp dự án -->
+        <a href="AmisExtensionV1.0.zip" download>Extension Nhập | Xuất Kho Amis</a>
+		<a href="led-calculator.xlsx" download>File Excel tính LED và Nguồn</a>
+		<a href="carton-calculator.xls" download>File tính kích thước thùng giấy</a>
+        <!-- Sau này thêm file chỉ cần thêm dòng ở đây -->
+        <!-- <a href="ToolABC.zip" download>ToolABC.zip</a> -->
+      </div>
+      <button class="close-btn" onclick="closeModal()">Đóng</button>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('downloadModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('downloadModal').classList.remove('active');
+    }
+  </script>
+
+</body>
+</html>
