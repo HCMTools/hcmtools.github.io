@@ -1,302 +1,417 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>LED Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #ecf0f3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      color: #333;
-    }
-    .card {
-      width: 100%;
-      max-width: 460px;
-      background: #ecf0f3;
-      border-radius: 24px;
-      padding: 26px 22px;
-      box-shadow: 12px 12px 24px #c9ccd1,
-                  -12px -12px 24px #ffffff;
-    }
-    .back-btn {
-      display: inline-block;
-      margin-bottom: 10px;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #2f5bea;
-      text-decoration: none;
-      border-radius: 14px;
-      background: #ecf0f3;
-      box-shadow: 4px 4px 8px #c9ccd1,
-                  -4px -4px 8px #ffffff;
-    }
-    h2 { text-align: center; margin-bottom: 18px; }
-    label { font-size: 13px; margin-bottom: 6px; display: block; }
-    input, select {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 14px;
-      border-radius: 18px;
-      border: none;
-      background: #ecf0f3;
-      box-shadow: inset 5px 5px 10px #c9ccd1,
-                  inset -5px -5px 10px #ffffff;
-      font-size: 14px;
-    }
-    .row { display: flex; gap: 10px; }
-    .row > div { flex: 1; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LED Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0a0c;--surface:#141418;--surface2:#1e1e25;--border:#2a2a36;
+  --accent:#7c6dff;--ag:rgba(124,109,255,0.12);--accent2:#ff6b8a;
+  --green:#34d399;--yellow:#fbbf24;--red:#f87171;
+  --text:#eeeef5;--text2:#7a7a90;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Be Vietnam Pro',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px 16px;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 18px;
-      border: none;
-      background: #5b8cff;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 16px;
-      background: #ecf0f3;
-      box-shadow: inset 4px 4px 8px #c9ccd1,
-                  inset -4px -4px 8px #ffffff;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .value { font-weight: 700; color: #2f5bea; }
-    .power { font-weight: 700; color: #d93025; }
+/* ── CARD ── */
+.card{
+  width:100%;max-width:520px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
 
-    .mode {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    .mode button {
-      background: #ecf0f3;
-      color: #333;
-      box-shadow: 4px 4px 8px #c9ccd1,
-                  -4px -4px 8px #ffffff;
-    }
-    .mode button.active {
-      background: #5b8cff;
-      color: #fff;
-    }
+/* ── HEADER ── */
+.card-header{
+  padding:18px 22px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.card-header-icon{
+  width:36px;height:36px;border-radius:9px;
+  background:rgba(124,109,255,0.15);
+  border:1px solid rgba(124,109,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.card-header-txt h2{
+  font-size:1rem;font-weight:800;letter-spacing:-0.02em;margin:0;
+}
+.card-header-txt p{
+  font-size:0.68rem;color:var(--text2);margin:2px 0 0;
+}
+.back-btn{
+  margin-left:auto;
+  padding:5px 12px;
+  font-size:0.68rem;font-weight:600;
+  font-family:'Be Vietnam Pro',sans-serif;
+  color:var(--text2);
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:6px;
+  text-decoration:none;
+  transition:all 0.15s;
+  cursor:pointer;
+}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-    .modal.active { display: flex; }
-    .modal-box {
-      background: #ecf0f3;
-      border-radius: 22px;
-      padding: 22px;
-      width: 90%;
-      max-width: 360px;
-      box-shadow: 14px 14px 28px #c9ccd1,
-                  -14px -14px 28px #ffffff;
-    }
-    .modal-title {
-      text-align: center;
-      font-weight: 600;
-      margin-bottom: 14px;
-    }
-    .modal-result {
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-    .close-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 16px;
-      border: none;
-      background: #5b8cff;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-    }
-  </style>
+/* ── BODY ── */
+.card-body{padding:20px 22px;display:flex;flex-direction:column;gap:16px;}
+
+/* ── MODE TOGGLE ── */
+.mode-row{display:flex;gap:6px;}
+.mode-btn{
+  flex:1;padding:8px 10px;
+  font-family:'Be Vietnam Pro',sans-serif;
+  font-size:0.75rem;font-weight:600;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface2);
+  color:var(--text2);
+  cursor:pointer;transition:all 0.15s;
+}
+.mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mode-btn.active{
+  background:rgba(124,109,255,0.18);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+/* ── SECTION ── */
+.section-label{
+  font-size:0.6rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text2);margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.section-label::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ── FORM GRID ── */
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* ── FIELD ── */
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:0.68rem;color:var(--text2);}
+input[type="number"],select{
+  width:100%;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:9px 11px;
+  color:var(--text);
+  font-size:0.82rem;
+  font-family:'JetBrains Mono',monospace;
+  outline:none;
+  transition:border-color 0.2s;
+  -webkit-appearance:none;
+}
+input[type="number"]:focus,select:focus{border-color:var(--accent);}
+select{font-family:'Be Vietnam Pro',sans-serif;font-size:0.75rem;}
+
+/* ── CALC BUTTON ── */
+.btn-calc{
+  width:100%;padding:12px;
+  background:linear-gradient(135deg,var(--accent),#a855f7);
+  border:none;border-radius:10px;
+  color:#fff;font-size:0.85rem;font-weight:700;
+  font-family:'Be Vietnam Pro',sans-serif;
+  cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-calc:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,109,255,0.3);}
+
+/* ── RESULT PANEL ── */
+.result-panel{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  display:none;
+}
+.result-panel.show{display:block;}
+.result-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+}
+.result-row:last-child{border-bottom:none;}
+.result-key{font-size:0.72rem;color:var(--text2);}
+.result-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.82rem;font-weight:700;color:var(--accent);
+}
+.result-val.big{font-size:1rem;color:var(--green);}
+.result-val.warn{color:var(--yellow);}
+.result-val.red{color:var(--red);}
+
+/* ── RESULT SUMMARY (top highlight) ── */
+.result-summary{
+  padding:14px;
+  background:rgba(124,109,255,0.07);
+  border-bottom:1px solid var(--border);
+  display:flex;gap:12px;
+}
+.rs-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.rs-n{
+  font-family:'JetBrains Mono',monospace;
+  font-size:1.3rem;font-weight:700;
+  line-height:1;
+}
+.rs-n.green{color:var(--green);}
+.rs-n.yellow{color:var(--yellow);}
+.rs-n.accent{color:var(--accent);}
+.rs-l{font-size:0.6rem;color:var(--text2);text-align:center;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:16px;right:16px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:9px 13px;font-size:0.72rem;
+  transform:translateY(60px);opacity:0;transition:all 0.25s;
+  z-index:999;max-width:280px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--green);}
+.toast.err{border-color:var(--accent2);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
 </head>
 <body>
 
 <div class="card">
-  <a href="index.html" class="back-btn">← Về trang chủ</a>
-  <h2>🔌 LED Calculator</h2>
 
-  <label>Chế độ tính</label>
-  <div class="mode">
-    <button id="btnSafe" class="active" onclick="setMode('safe')">🛡 An toàn</button>
-    <button id="btnExact" onclick="setMode('exact')">🎯 Chính xác</button>
+  <!-- HEADER -->
+  <div class="card-header">
+    <div class="card-header-icon">🔌</div>
+    <div class="card-header-txt">
+      <h2>LED Calculator</h2>
+      <p>Tính nguồn cho đèn LED dải</p>
+    </div>
+    <a href="index.html" class="back-btn">← Trang chủ</a>
   </div>
 
-  <!-- CHIỀU DÀI | SỐ LƯỢNG -->
-  <div class="row">
+  <!-- BODY -->
+  <div class="card-body">
+
+    <!-- Chế độ -->
     <div>
-      <label>Chiều dài (m)</label>
-      <input type="number" id="length" value="0" step="0.01">
+      <div class="section-label">Chế độ tính</div>
+      <div class="mode-row">
+        <button class="mode-btn active" id="btnSafe" onclick="setMode('safe')">🛡 An toàn</button>
+        <button class="mode-btn" id="btnExact" onclick="setMode('exact')">🎯 Chính xác</button>
+      </div>
     </div>
+
+    <!-- Thông số đèn -->
     <div>
-      <label>Số lượng đèn</label>
-      <input type="number" id="qty" value="1">
+      <div class="section-label">Thông số đèn</div>
+      <div class="r2">
+        <div class="field">
+          <label>Chiều dài (m)</label>
+          <input type="number" id="length" value="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Số lượng đèn</label>
+          <input type="number" id="qty" value="1" min="1">
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- SỐ ĐƯỜNG LED -->
-  <label>Số đường LED</label>
-  <div class="row">
+    <!-- Cấu hình LED -->
     <div>
-      <select id="lineSuggest" onchange="applyLine()">
-        <option value="">— Gợi ý theo chiều rộng —</option>
-        <option value="1">≤ 60mm → 1 đường</option>
-        <option value="2">61–200mm → 2 đường</option>
-        <option value="3">&gt; 200mm → 3 đường</option>
-      </select>
+      <div class="section-label">Cấu hình LED</div>
+      <div class="r2" style="margin-bottom:10px">
+        <div class="field">
+          <label>Gợi ý số đường</label>
+          <select id="lineSuggest" onchange="applyLine()">
+            <option value="">— Theo chiều rộng —</option>
+            <option value="1">≤ 60mm → 1 đường</option>
+            <option value="2">61–200mm → 2 đường</option>
+            <option value="3">> 200mm → 3 đường</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Số đường LED</label>
+          <input type="number" id="lines" value="1" min="1">
+        </div>
+      </div>
+      <div class="r2">
+        <div class="field">
+          <label>Loại LED</label>
+          <select id="ledType" onchange="applyLed()">
+            <option value="">— Chọn loại LED —</option>
+            <optgroup label="20 W/m">
+              <option value="20">2835-10MM-240D</option>
+              <option value="20">2835-15MM-240D</option>
+            </optgroup>
+            <optgroup label="28 W/m">
+              <option value="28">2835-20MM-276D</option>
+              <option value="28">2835-30MM-280D</option>
+            </optgroup>
+            <optgroup label="36 W/m">
+              <option value="36">2835-12MM-360D</option>
+              <option value="36">2835-15MM-360D</option>
+              <option value="36">2835-30MM-360D</option>
+            </optgroup>
+            <optgroup label="48 W/m">
+              <option value="48">2835-15MM-480D</option>
+              <option value="48">2835-40MM-480D</option>
+            </optgroup>
+            <optgroup label="60 W/m">
+              <option value="60">2835-50MM-600D</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <label>Công suất LED (W/m)</label>
+          <input type="number" id="powerPerM" value="28" min="1">
+        </div>
+      </div>
     </div>
+
+    <!-- Thông số nguồn -->
     <div>
-      <input type="number" id="lines" value="1">
+      <div class="section-label">Thông số nguồn</div>
+      <div class="r2">
+        <div class="field">
+          <label>Công suất 1 nguồn (W)</label>
+          <input type="number" id="psu" value="400" min="1">
+        </div>
+        <div class="field">
+          <label>Sử dụng nguồn (%)</label>
+          <input type="number" id="loadPercent" value="80" min="1" max="100">
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- LOẠI LED | CÔNG SUẤT -->
-  <div class="row">
-    <div>
-      <label>Chọn Loại LED đang dùng</label>
-      <select id="ledType" onchange="applyLed()">
-        <option value="">— Chọn loại LED —</option>
-        <option value="20">2835-10MM-240D — 20W/m</option>
-        <option value="20">2835-15MM-240D — 20W/m</option>
-        <option value="28">2835-20MM-276D — 28W/m</option>
-        <option value="28">2835-30MM-280D — 28W/m</option>
-        <option value="36">2835-12MM-360D — 36W/m</option>
-        <option value="36">2835-15MM-360D — 36W/m</option>
-        <option value="36">2835-30MM-360D — 36W/m</option>
-        <option value="48">2835-15MM-480D — 48W/m</option>
-        <option value="48">2835-40MM-480D — 48W/m</option>
-        <option value="60">2835-50MM-600D — 60W/m</option>
-      </select>
+    <!-- Nút tính -->
+    <button class="btn-calc" onclick="calculate()">
+      ⚡ Tính toán
+    </button>
+
+    <!-- Kết quả -->
+    <div class="result-panel" id="resultPanel">
+      <!-- Summary row -->
+      <div class="result-summary">
+        <div class="rs-item">
+          <span class="rs-n accent" id="rLength">–</span>
+          <span class="rs-l">Tổng chiều dài LED (m)</span>
+        </div>
+        <div class="rs-item">
+          <span class="rs-n yellow" id="rPower">–</span>
+          <span class="rs-l">Tổng công suất (W)</span>
+        </div>
+        <div class="rs-item">
+          <span class="rs-n green" id="rQty">–</span>
+          <span class="rs-l">Số nguồn cần dùng</span>
+        </div>
+      </div>
+      <!-- Detail rows -->
+      <div class="result-row">
+        <span class="result-key">Chế độ tính</span>
+        <span class="result-val" id="rMode">–</span>
+      </div>
+      <div class="result-row">
+        <span class="result-key">Công suất LED / đèn</span>
+        <span class="result-val" id="rPowerPerLamp">–</span>
+      </div>
+      <div class="result-row">
+        <span class="result-key">Số nguồn / đèn</span>
+        <span class="result-val" id="rPsuPerLamp">–</span>
+      </div>
+      <div class="result-row">
+        <span class="result-key">Loại nguồn</span>
+        <span class="result-val" id="rPsuType">–</span>
+      </div>
     </div>
-    <div>
-      <label>Công suất (W/m)</label>
-      <input type="number" id="powerPerM" value="28">
-    </div>
-  </div>
 
-  <label>Công suất 1 nguồn (W)</label>
-  <input type="number" id="psu" value="400">
+  </div><!-- /card-body -->
+</div><!-- /card -->
 
-  <label>Công suất nguồn sử dụng (%)</label>
-  <input type="number" id="loadPercent" value="80">
-
-  <button onclick="calculate()">Tính toán</button>
-
-  <div class="result">
-    <div>Tổng chiều dài LED: <span class="value" id="rLength">–</span></div>
-    <div>Tổng công suất LED: <span class="value" id="rPower">–</span></div>
-    <div>Số nguồn <span class="power" id="rPsu">–</span>:
-      <span class="value" id="rQty">–</span>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="resultModal">
-  <div class="modal-box">
-    <div class="modal-title">📊 Kết quả tính toán</div>
-    <div class="modal-result" id="modalContent"></div>
-    <button class="close-btn" onclick="closeModal()">Đóng</button>
-  </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-let calcMode = "safe";
+let calcMode='safe';
 
-const lengthInput = document.getElementById("length");
-const qtyInput = document.getElementById("qty");
-const linesInput = document.getElementById("lines");
-const powerPerMInput = document.getElementById("powerPerM");
-const psuInput = document.getElementById("psu");
-const loadPercentInput = document.getElementById("loadPercent");
+function fmt(n){ return Number.isInteger(n)?n:n.toFixed(2); }
 
-function fmt(n) {
-  return Number.isInteger(n) ? n : n.toFixed(2);
+function setMode(m){
+  calcMode=m;
+  document.getElementById('btnSafe').classList.toggle('active',m==='safe');
+  document.getElementById('btnExact').classList.toggle('active',m==='exact');
 }
 
-function setMode(m) {
-  calcMode = m;
-  btnSafe.classList.toggle("active", m === "safe");
-  btnExact.classList.toggle("active", m === "exact");
+function applyLed(){
+  const v=document.getElementById('ledType').value;
+  if(v) document.getElementById('powerPerM').value=v;
 }
 
-function applyLed() {
-  if (ledType.value) powerPerM.value = ledType.value;
+function applyLine(){
+  const v=document.getElementById('lineSuggest').value;
+  if(v) document.getElementById('lines').value=v;
 }
 
-function applyLine() {
-  if (lineSuggest.value) lines.value = lineSuggest.value;
-}
+function calculate(){
+  const length      = +document.getElementById('length').value;
+  const qty         = +document.getElementById('qty').value;
+  const lines       = +document.getElementById('lines').value;
+  const powerPerM   = +document.getElementById('powerPerM').value;
+  const psu         = +document.getElementById('psu').value;
+  const load        = +document.getElementById('loadPercent').value;
 
-function calculate() {
-  const length = +lengthInput.value;
-  const qty = +qtyInput.value;
-  const lines = +linesInput.value;
-  const powerPerM = +powerPerMInput.value;
-  const psu = +psuInput.value;
-  const load = +loadPercentInput.value;
-
-  let lengthPerLamp, powerPerLamp;
-
-  if (calcMode === "safe") {
-    lengthPerLamp = Math.ceil(length * lines);
-    powerPerLamp  = Math.ceil(lengthPerLamp * powerPerM);
-  } else {
-    lengthPerLamp = length * lines;
-    powerPerLamp  = lengthPerLamp * powerPerM;
+  if(!length||!qty||!lines||!powerPerM||!psu||!load){
+    showToast('⚠️ Vui lòng nhập đầy đủ thông số','err'); return;
   }
 
-  const requiredPsuPowerPerLamp = powerPerLamp / (load / 100);
-  const psuPerLamp = Math.ceil(requiredPsuPowerPerLamp / psu);
+  let lengthPerLamp, powerPerLamp;
+  if(calcMode==='safe'){
+    lengthPerLamp = Math.ceil(length*lines);
+    powerPerLamp  = Math.ceil(lengthPerLamp*powerPerM);
+  } else {
+    lengthPerLamp = length*lines;
+    powerPerLamp  = lengthPerLamp*powerPerM;
+  }
 
-  const totalLength = lengthPerLamp * qty;
-  const totalPower  = powerPerLamp * qty;
-  const totalPsu    = psuPerLamp * qty;
+  const requiredPsu = powerPerLamp/(load/100);
+  const psuPerLamp  = Math.ceil(requiredPsu/psu);
+  const totalLength = lengthPerLamp*qty;
+  const totalPower  = powerPerLamp*qty;
+  const totalPsu    = psuPerLamp*qty;
 
-  rLength.innerText = fmt(totalLength) + " m";
-  rPower.innerText  = fmt(totalPower) + " W";
-  rPsu.innerText    = psu + "W (" + load + "%)";
-  rQty.innerText    = totalPsu + " cục";
+  document.getElementById('rLength').textContent      = fmt(totalLength)+' m';
+  document.getElementById('rPower').textContent       = fmt(totalPower)+' W';
+  document.getElementById('rQty').textContent         = totalPsu+' cục';
+  document.getElementById('rMode').textContent        = calcMode==='safe'?'🛡 An toàn':'🎯 Chính xác';
+  document.getElementById('rPowerPerLamp').textContent= fmt(powerPerLamp)+' W / đèn';
+  document.getElementById('rPsuPerLamp').textContent  = psuPerLamp+' cục / đèn';
+  document.getElementById('rPsuType').textContent     = psu+'W · tải '+load+'%';
 
-  modalContent.innerHTML = `
-    Chế độ: <b>${calcMode === "safe" ? "An toàn" : "Chính xác"}</b><br>
-    Tổng chiều dài LED: <b>${fmt(totalLength)} m</b><br>
-    Tổng công suất LED: <b>${fmt(totalPower)} W</b><br>
-    Số nguồn cho 1 đèn: <b>${psuPerLamp} cục</b><br>
-    Tổng số nguồn: <b>${totalPsu} cục</b>
-  `;
-
-  resultModal.classList.add("active");
+  document.getElementById('resultPanel').classList.add('show');
+  showToast('✅ Tính toán hoàn tất','ok');
 }
 
-function closeModal() {
-  resultModal.classList.remove("active");
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3000);
 }
 </script>
-
 </body>
 </html>
