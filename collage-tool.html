@@ -381,8 +381,8 @@ input[type="color"]{width:25px;height:25px;border:1px solid var(--border);border
         <div><label class="fl">Định dạng</label>
           <select id="outFmt"><option value="jpeg">JPG</option><option value="png" selected>PNG</option></select>
         </div>
-        <div><label class="fl">Chất lượng JPG</label>
-          <div class="slrow"><input type="range" id="jpgQ" min="70" max="100" value="95" oninput="document.getElementById('qv').textContent=this.value+'%'"><span class="sv" id="qv">95%</span></div>
+        <div><label class="fl">Chất lượng ảnh xuất ra</label>
+          <div class="slrow"><input type="range" id="jpgQ" min="70" max="100" value="100" oninput="document.getElementById('qv').textContent=this.value+'%'"><span class="sv" id="qv">100%</span></div>
         </div>
       </div>
     </div>
@@ -441,7 +441,7 @@ input[type="color"]{width:25px;height:25px;border:1px solid var(--border);border
         </select>
       </div>
       <div class="r2">
-        <div><label class="fl">Khoảng cách (px)</label><input type="number" id="gap" value="5" min="0" max="40"></div>
+        <div><label class="fl">Khoảng cách (px)</label><input type="number" id="gap" value="4" min="0" max="40"></div>
         <div><label class="fl">Kích thước xuất</label><input type="number" id="outSize" value="2400" min="800" max="5000" step="200"></div>
       </div>
       <div>
