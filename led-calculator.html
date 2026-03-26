@@ -69,24 +69,7 @@ body{
 /* ── BODY ── */
 .card-body{padding:20px 22px;display:flex;flex-direction:column;gap:16px;}
 
-/* ── MODE TOGGLE ── */
-.mode-row{display:flex;gap:6px;}
-.mode-btn{
-  flex:1;padding:8px 10px;
-  font-family:'Be Vietnam Pro',sans-serif;
-  font-size:0.75rem;font-weight:600;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:var(--surface2);
-  color:var(--text2);
-  cursor:pointer;transition:all 0.15s;
-}
-.mode-btn:hover{border-color:var(--accent);color:var(--accent);}
-.mode-btn.active{
-  background:rgba(124,109,255,0.18);
-  border-color:var(--accent);
-  color:var(--accent);
-}
+
 
 /* ── SECTION ── */
 .section-label{
@@ -209,16 +192,6 @@ select{font-family:'Be Vietnam Pro',sans-serif;font-size:0.75rem;}
 
   <!-- BODY -->
   <div class="card-body">
-
-    <!-- Chế độ -->
-    <div>
-      <div class="section-label">Chế độ tính</div>
-      <div class="mode-row">
-        <button class="mode-btn active" id="btnSafe" onclick="setMode('safe')">🛡 An toàn</button>
-        <button class="mode-btn" id="btnExact" onclick="setMode('exact')">🎯 Chính xác</button>
-      </div>
-    </div>
-
     <!-- Thông số đèn -->
     <div>
       <div class="section-label">Thông số đèn</div>
@@ -325,10 +298,6 @@ select{font-family:'Be Vietnam Pro',sans-serif;font-size:0.75rem;}
       </div>
       <!-- Detail rows -->
       <div class="result-row">
-        <span class="result-key">Chế độ tính</span>
-        <span class="result-val" id="rMode">–</span>
-      </div>
-      <div class="result-row">
         <span class="result-key">Công suất LED / đèn</span>
         <span class="result-val" id="rPowerPerLamp">–</span>
       </div>
@@ -348,15 +317,9 @@ select{font-family:'Be Vietnam Pro',sans-serif;font-size:0.75rem;}
 <div class="toast" id="toast"></div>
 
 <script>
-let calcMode='safe';
+const calcMode='exact'; // luôn dùng chính xác
 
 function fmt(n){ return Number.isInteger(n)?n:n.toFixed(2); }
-
-function setMode(m){
-  calcMode=m;
-  document.getElementById('btnSafe').classList.toggle('active',m==='safe');
-  document.getElementById('btnExact').classList.toggle('active',m==='exact');
-}
 
 function applyLed(){
   const v=document.getElementById('ledType').value;
@@ -398,7 +361,6 @@ function calculate(){
   document.getElementById('rLength').textContent      = fmt(totalLength)+' m';
   document.getElementById('rPower').textContent       = fmt(totalPower)+' W';
   document.getElementById('rQty').textContent         = totalPsu+' cục';
-  document.getElementById('rMode').textContent        = calcMode==='safe'?'🛡 An toàn':'🎯 Chính xác';
   document.getElementById('rPowerPerLamp').textContent= fmt(powerPerLamp)+' W / đèn';
   document.getElementById('rPsuPerLamp').textContent  = psuPerLamp+' cục / đèn';
   document.getElementById('rPsuType').textContent     = psu+'W · tải '+load+'%';
