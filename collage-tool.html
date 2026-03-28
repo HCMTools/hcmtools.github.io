@@ -519,7 +519,7 @@ input[type="color"]{width:25px;height:25px;border:1px solid var(--border);border
       </div>
       <div>
         <label class="fl">Kích thước (%)</label>
-        <div class="slrow"><input type="range" id="loSz" min="10" max="70" value="32" oninput="document.getElementById('szv').textContent=this.value+'%'"><span class="sv" id="szv">32%</span></div>
+        <div class="slrow"><input type="range" id="loSz" min="10" max="70" value="70" oninput="document.getElementById('szv').textContent=this.value+'%'"><span class="sv" id="szv">70%</span></div>
       </div>
     </div>
   </div>
@@ -976,7 +976,7 @@ async function processGroup(gi,group,size,gap,code,doWM){
       ctx.save();ctx.globalAlpha=op;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
       ctx.drawImage(logoImg,(size-lw)/2,(size-lh)/2,lw,lh);ctx.restore();
     }
-    if(code) drawCode(ctx,code,size);
+    if(code) drawCode(ctx, code ? `${code}-${gi+1}` : "", size);
     canvases[gi]=cv;
     const pc=cvEl.getContext('2d');cvEl.width=cv.width;cvEl.height=cv.height;pc.drawImage(cv,0,0);
     ov.style.display='none';db.disabled=false;doneCount++;
